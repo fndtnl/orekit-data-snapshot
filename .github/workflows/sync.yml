@@ -1,0 +1,40 @@
+name: sync
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: blacksmith-2vcpu-ubuntu-2404-arm
+    env:
+      UPSTREAM: https://gitlab.orekit.org/orekit/orekit-data.git
+      UPSTREAM_REF: main
+      VENDOR_DIR: orekit/orekit-data
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refresh source
+        id: sync
+        run: |
+          rm -rf "$VENDOR_DIR"
+          git clone --depth 1 --branch "$UPSTREAM_REF" "$UPSTREAM" "$VENDOR_DIR"
+          UPSTREAM_SHA=$(git -C "$VENDOR_DIR" rev-parse HEAD)
+          rm -rf "$VENDOR_DIR/.git"
+          echo "sha=$UPSTREAM_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$VENDOR_DIR"
+          if git diff --cached --quiet; then
+            echo "No upstream changes."
+            exit 0
+          fi
+          SHA="${{ steps.sync.outputs.sha }}"
+          git commit -m "snapshot: sync $VENDOR_DIR to ${SHA:0:7}"
+          git push
