@@ -1,6 +1,6 @@
 DATATYPE CssiSpaceWeather
 VERSION 1.2 
-UPDATED 2026 Sep 19 03:41:00.00
+UPDATED 2026 Sep 19 06:40:00.00
 # --------------------------------------------------------------------------------------------------------------------------------
 #                           ANALYTICAL GRAPHICS, INC.
 #                    CENTER FOR SPACE STANDARDS & INNOVATION
