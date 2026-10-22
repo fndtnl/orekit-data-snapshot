@@ -27,7 +27,6 @@
 
 # base URLS
 usno_ser7_url=https://maia.usno.navy.mil/ser7
-iers_rapid_url=https://datacenter.iers.org/data
 msafe_url_uploads=https://www.nasa.gov/wp-content/uploads
 msafe_url_atoms=https://www3.nasa.gov/sites/default/files/atoms/files
 cssi_url=https://ftp.agi.com/pub/DynamicEarthData
@@ -42,8 +41,8 @@ fetch_URL()
   fi
 
   # convert either DOS or MAC file to Unix line endings
-  if curl -L -s "$1/$2" | sed 's,\r$,,' | tr '\015' '\012' > "$2" && test -s "$2" ; then
-      if grep -i "<\!doctype html\|404 not found\|The requested URL was not found on this server\|502 Bad Gateway" "$2" 1> /dev/null ; then
+  if curl -f -L -s "$1/$2" | sed 's,\r$,,' | tr '\015' '\012' > "$2" && test -s "$2" ; then
+      if grep -i "<\!doctype html\|<html\|404 not found\|The requested URL was not found on this server\|502 Bad Gateway" "$2" 1> /dev/null ; then
           # discard file identified as an HTML-error response
           if [ -f "$2" ] ; then
               # remove file
@@ -221,8 +220,8 @@ first_missing_MSAFE()
 fetch_URL $usno_ser7_url tai-utc.dat
  
 # update (overwriting) Earth Orientation Parameters
-(cd Earth-Orientation-Parameters/IAU-2000 && fetch_URL $iers_rapid_url/9 finals2000A.all)
-(cd Earth-Orientation-Parameters/IAU-1980 && fetch_URL $iers_rapid_url/7 finals.all)
+(cd Earth-Orientation-Parameters/IAU-2000 && fetch_URL $usno_ser7_url finals2000A.all)
+(cd Earth-Orientation-Parameters/IAU-1980 && fetch_URL $usno_ser7_url finals.all)
 
 # update (adding files) Marshall Solar Activity Future Estimation
 read fetch_year fetch_month <<< $(cd MSAFE ; first_missing_MSAFE)
